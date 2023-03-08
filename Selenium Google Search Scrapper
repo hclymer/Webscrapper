@@ -1,0 +1,61 @@
+from selenium import webdriver
+from selenium import *
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import csv
+import time
+from selenium.webdriver.common.keys import Keys
+
+DRIVER_PATH = "chromedriver.exe"
+chrome_options = Options()
+chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'],)
+# chrome_options.add_experimental_option("detach", True)
+# "detach", True
+driver = webdriver.Chrome(executable_path=DRIVER_PATH, options= chrome_options)
+
+search_urls = []
+searchitems= []
+
+#found with excel
+with open("searchitemsclinicalgovnodup.txt") as file:
+    searchitems = iter([line.strip() for line in file])
+
+# print(searchitems)
+
+## Finds search urls 
+for search in searchitems:
+    url = "https://www.google.com/"
+    driver.get(url)
+    driver.implicitly_wait(1)
+    time.sleep(1)
+    m = driver.find_element(By.CLASS_NAME,"gLFyf")
+    m.send_keys(search)
+    m.send_keys(Keys.ENTER)
+    curl = driver.current_url
+    # print(curl)
+    with open("searchurlsclinicalgov.txt", "a") as w:
+            w.write(str(curl)+ "\n")
+
+
+
+##takes the urls from above and searches for an address
+with open(searchurlsclinicalgov.txt") as file:
+    searchitems = iter([line.strip() for line in file])
+for url in searchitems:
+    driver.get(url)
+    title = driver.title
+    driver.implicitly_wait(2)
+    time.sleep(2)
+    try:
+        res = driver.find_element(By.CLASS_NAME,"LrzXr")
+        res = res.text
+    except:
+        res = "address not found"
+        pass
+    file = open('searchresoutputclinicalgovnodup2.csv', 'a', newline="",encoding="utf-8")
+    with file:
+            field_names= ["title","location"]
+            write= csv.DictWriter(file,fieldnames=field_names)
+            write.writerow({"title" : title, "location": res} )
