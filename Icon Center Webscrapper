@@ -1,0 +1,43 @@
+from selenium import webdriver
+from selenium import *
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import csv
+
+#set a wait so that it loads
+DRIVER_PATH = r"C:\Users\Henry\Personal Codes\Web Scrapping\Chrome Driver\chromedriver.exe"
+chrome_options = Options()
+chrome_options.add_experimental_option('excludeSwitches', ['enable-logging'])
+# "detach", True
+driver = webdriver.Chrome(executable_path=DRIVER_PATH, options= chrome_options)
+driver.implicitly_wait(10)
+driver.get("https://iconcancercentre.com.au/centre/windsor-gardens/")
+
+###Web Scrapper for ICON Centers doctors title and name###
+with open(r"C:\Users\Henry\Personal Codes\Web Scrapping\center_urls.txt", "r") as f:
+    for url in f.readlines():
+        driver.get(url)
+        names  = []
+        titles = []
+        for dname in driver.find_elements(By.CLASS_NAME, "doctor-card-title"):
+            names.append(dname.text)
+        for dtitle in driver.find_elements(By.CLASS_NAME, "tag"):
+            titles.append(dtitle.text)
+            # res = {}
+        # for name in names:
+        #     for title in titles: 
+        #         res[name]= title
+        #         titles.remove(title)
+        #         names.remove(name)
+        #         break
+        file = open('output3.csv', 'a')
+        with file:
+            header= ["name","title","location"]
+            write= csv.writer(file)
+            write.writerow([url])
+            write.writerows(zip(names, titles))
+            # with open("output3.txt", "a") as w:
+            #     w.write(url + "\n")
+            #     w.write(str(res))
